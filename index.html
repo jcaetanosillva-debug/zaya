@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -252,7 +253,7 @@
 <body class="font-sans antialiased h-screen flex overflow-hidden">
 
   <!-- ============================= TELA DE LOGIN ============================= -->
-  <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-zaya-bg px-4">
+  <div id="login-screen" class="auth-screen fixed inset-0 z-50 flex items-center justify-center bg-zaya-bg px-4">
     <div class="bg-white p-8 sm:p-10 rounded-3xl shadow-xl border border-zaya-border w-full max-w-md fade-in">
       <div class="text-center mb-8">
         <div
@@ -264,14 +265,18 @@
       </div>
       <form id="login-form" class="space-y-5">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Usuário / Email</label>
-          <input type="text" id="login-user" autocomplete="username"
+          <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+          <input type="text" id="login-email" autocomplete="username"
             class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-zaya-primary focus:border-transparent transition"
-            placeholder="admin123, prop123 ou saas123" required>
+            placeholder="voce@email.com" required>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-          <input type="password" id="login-pass" autocomplete="current-password"
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-sm font-medium text-gray-700">Senha</label>
+            <button type="button" onclick="showAuthScreen('forgot-password-screen')"
+              class="text-xs font-medium text-zaya-primary hover:underline">Esqueci minha senha</button>
+          </div>
+          <input type="password" id="login-password" autocomplete="current-password"
             class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-zaya-primary focus:border-transparent transition"
             placeholder="••••••••" required>
         </div>
@@ -279,12 +284,162 @@
           class="w-full bg-zaya-primary hover:bg-pink-500 text-white font-semibold py-3 rounded-xl shadow-md transition transform hover:scale-[1.02]">Entrar
           no Sistema</button>
       </form>
+
+      <div class="flex items-center gap-3 my-6">
+        <div class="flex-1 h-px bg-gray-200"></div>
+        <span class="text-xs text-gray-400">ou</span>
+        <div class="flex-1 h-px bg-gray-200"></div>
+      </div>
+
+      <button type="button" onclick="loginWithGoogle()"
+        class="w-full flex items-center justify-center gap-3 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-3 rounded-xl transition">
+        <i class="fa-brands fa-google text-[#EA4335]"></i> Entrar com Google
+      </button>
+
+      <p class="text-center text-sm text-gray-500 mt-6">Não tem uma conta?
+        <button type="button" onclick="showAuthScreen('signup-screen')"
+          class="text-zaya-primary font-semibold hover:underline">Cadastre-se</button>
+      </p>
+
       <div class="mt-6 text-xs text-gray-400 text-center bg-gray-50 p-3 rounded-lg border border-gray-100 space-y-1">
-        <p class="font-semibold text-gray-600 mb-1">Credenciais de Teste:</p>
+        <p class="font-semibold text-gray-600 mb-1">Credenciais de Teste (demo):</p>
         <p><strong>Admin do Salão:</strong> admin123 / 123321</p>
         <p><strong>Proprietária (leitura):</strong> prop123 / qualquer senha</p>
         <p><strong>Admin do SaaS Zaya.App:</strong> saas123 / qualquer senha</p>
       </div>
+    </div>
+  </div>
+
+  <!-- ============================= TELA DE CADASTRO ============================= -->
+  <div id="signup-screen"
+    class="auth-screen hidden fixed inset-0 z-50 flex items-center justify-center bg-zaya-bg px-4">
+    <div class="bg-white p-8 sm:p-10 rounded-3xl shadow-xl border border-zaya-border w-full max-w-md fade-in">
+      <div class="text-center mb-8">
+        <div
+          class="w-20 h-20 bg-gradient-to-br from-zaya-primary to-zaya-secondary rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-4">
+          <span class="text-white text-3xl font-bold font-serif italic">ZY</span>
+        </div>
+        <h1 class="text-2xl font-bold text-zaya-text">Criar Conta</h1>
+        <p class="text-sm text-gray-500 mt-1">Comece a gerenciar seu salão com o Zaya.App</p>
+      </div>
+      <form id="signup-form" class="space-y-5">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
+          <input type="text" id="signup-name" autocomplete="name"
+            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-zaya-primary focus:border-transparent transition"
+            placeholder="Seu nome" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+          <input type="email" id="signup-email" autocomplete="username"
+            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-zaya-primary focus:border-transparent transition"
+            placeholder="voce@email.com" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+          <input type="password" id="signup-password" autocomplete="new-password" minlength="6"
+            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-zaya-primary focus:border-transparent transition"
+            placeholder="Mínimo 6 caracteres" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar senha</label>
+          <input type="password" id="signup-password-confirm" autocomplete="new-password" minlength="6"
+            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-zaya-primary focus:border-transparent transition"
+            placeholder="••••••••" required>
+        </div>
+        <button type="submit"
+          class="w-full bg-zaya-primary hover:bg-pink-500 text-white font-semibold py-3 rounded-xl shadow-md transition transform hover:scale-[1.02]">Criar
+          Conta</button>
+      </form>
+      <p class="text-center text-sm text-gray-500 mt-6">Já tem uma conta?
+        <button type="button" onclick="showAuthScreen('login-screen')"
+          class="text-zaya-primary font-semibold hover:underline">Fazer login</button>
+      </p>
+    </div>
+  </div>
+
+  <!-- ============================= TELA DE CONFIRMAÇÃO DE E-MAIL ============================= -->
+  <div id="confirm-email-screen"
+    class="auth-screen hidden fixed inset-0 z-50 flex items-center justify-center bg-zaya-bg px-4">
+    <div
+      class="bg-white p-8 sm:p-10 rounded-3xl shadow-xl border border-zaya-border w-full max-w-md fade-in text-center">
+      <div
+        class="w-20 h-20 bg-gradient-to-br from-zaya-primary to-zaya-secondary rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-4">
+        <i class="fas fa-envelope-open-text text-white text-3xl"></i>
+      </div>
+      <h1 class="text-2xl font-bold text-zaya-text">Confirme seu e-mail</h1>
+      <p class="text-sm text-gray-500 mt-3 leading-relaxed">
+        Enviamos um link de confirmação para <strong id="confirm-email-address" class="text-zaya-text">seu
+          e-mail</strong>.
+        Verifique sua caixa de entrada (e o spam) e clique no link para ativar sua conta.
+        Somente após confirmar o endereço será possível fazer login no Zaya.App.
+      </p>
+      <button type="button" id="resend-confirm-btn" onclick="resendConfirmationEmail()"
+        class="w-full mt-6 bg-zaya-primary hover:bg-pink-500 text-white font-semibold py-3 rounded-xl shadow-md transition transform hover:scale-[1.02] disabled:opacity-60 disabled:hover:scale-100">
+        Reenviar e-mail de confirmação
+      </button>
+      <button type="button" onclick="showAuthScreen('login-screen')"
+        class="w-full mt-3 text-gray-500 hover:text-zaya-primary text-sm font-medium py-2">Voltar para o login</button>
+    </div>
+  </div>
+
+  <!-- ============================= TELA: ESQUECI MINHA SENHA ============================= -->
+  <div id="forgot-password-screen"
+    class="auth-screen hidden fixed inset-0 z-50 flex items-center justify-center bg-zaya-bg px-4">
+    <div class="bg-white p-8 sm:p-10 rounded-3xl shadow-xl border border-zaya-border w-full max-w-md fade-in">
+      <div class="text-center mb-8">
+        <div
+          class="w-20 h-20 bg-gradient-to-br from-zaya-primary to-zaya-secondary rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-4">
+          <i class="fas fa-key text-white text-3xl"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-zaya-text">Esqueci minha senha</h1>
+        <p class="text-sm text-gray-500 mt-1">Informe seu e-mail para receber o link de redefinição</p>
+      </div>
+      <form id="forgot-password-form" class="space-y-5">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+          <input type="email" id="forgot-email" autocomplete="username"
+            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-zaya-primary focus:border-transparent transition"
+            placeholder="voce@email.com" required>
+        </div>
+        <button type="submit"
+          class="w-full bg-zaya-primary hover:bg-pink-500 text-white font-semibold py-3 rounded-xl shadow-md transition transform hover:scale-[1.02]">Enviar
+          link de recuperação</button>
+      </form>
+      <button type="button" onclick="showAuthScreen('login-screen')"
+        class="w-full mt-4 text-gray-500 hover:text-zaya-primary text-sm font-medium py-2">Voltar para o login</button>
+    </div>
+  </div>
+
+  <!-- ============================= TELA: REDEFINIR SENHA ============================= -->
+  <div id="reset-password-screen"
+    class="auth-screen hidden fixed inset-0 z-50 flex items-center justify-center bg-zaya-bg px-4">
+    <div class="bg-white p-8 sm:p-10 rounded-3xl shadow-xl border border-zaya-border w-full max-w-md fade-in">
+      <div class="text-center mb-8">
+        <div
+          class="w-20 h-20 bg-gradient-to-br from-zaya-primary to-zaya-secondary rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-4">
+          <i class="fas fa-lock text-white text-3xl"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-zaya-text">Redefinir senha</h1>
+        <p class="text-sm text-gray-500 mt-1">Escolha uma nova senha para sua conta</p>
+      </div>
+      <form id="reset-password-form" class="space-y-5">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nova senha</label>
+          <input type="password" id="reset-password" autocomplete="new-password" minlength="6"
+            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-zaya-primary focus:border-transparent transition"
+            placeholder="Mínimo 6 caracteres" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar nova senha</label>
+          <input type="password" id="reset-password-confirm" autocomplete="new-password" minlength="6"
+            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-zaya-primary focus:border-transparent transition"
+            placeholder="••••••••" required>
+        </div>
+        <button type="submit"
+          class="w-full bg-zaya-primary hover:bg-pink-500 text-white font-semibold py-3 rounded-xl shadow-md transition transform hover:scale-[1.02]">Redefinir
+          senha</button>
+      </form>
     </div>
   </div>
 
@@ -440,7 +595,8 @@
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-zaya-border flex items-center gap-4">
               <div
                 class="w-12 h-12 bg-green-100 text-green-500 rounded-xl flex items-center justify-center text-xl shrink-0">
-                <i class="fas fa-check-circle"></i></div>
+                <i class="fas fa-check-circle"></i>
+              </div>
               <div>
                 <p class="text-xs text-gray-500">Atendidos Hoje</p>
                 <h3 class="text-2xl font-bold" id="kpi-atendidos">-</h3>
@@ -449,7 +605,8 @@
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-zaya-border flex items-center gap-4">
               <div
                 class="w-12 h-12 bg-blue-100 text-blue-500 rounded-xl flex items-center justify-center text-xl shrink-0">
-                <i class="far fa-calendar-check"></i></div>
+                <i class="far fa-calendar-check"></i>
+              </div>
               <div>
                 <p class="text-xs text-gray-500">Agendados</p>
                 <h3 class="text-2xl font-bold" id="kpi-agendados">-</h3>
@@ -458,7 +615,8 @@
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-zaya-border flex items-center gap-4">
               <div
                 class="w-12 h-12 bg-red-100 text-red-500 rounded-xl flex items-center justify-center text-xl shrink-0">
-                <i class="fas fa-times-circle"></i></div>
+                <i class="fas fa-times-circle"></i>
+              </div>
               <div>
                 <p class="text-xs text-gray-500">Cancelados</p>
                 <h3 class="text-2xl font-bold" id="kpi-cancelados">-</h3>
@@ -467,7 +625,8 @@
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-zaya-border flex items-center gap-4">
               <div
                 class="w-12 h-12 bg-purple-100 text-zaya-secondary rounded-xl flex items-center justify-center text-xl shrink-0">
-                <i class="fas fa-sync-alt"></i></div>
+                <i class="fas fa-sync-alt"></i>
+              </div>
               <div>
                 <p class="text-xs text-gray-500">Reagendados</p>
                 <h3 class="text-2xl font-bold" id="kpi-reagendados">-</h3>
@@ -476,7 +635,8 @@
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-zaya-border flex items-center gap-4">
               <div
                 class="w-12 h-12 bg-pink-100 text-zaya-primary rounded-xl flex items-center justify-center text-xl shrink-0">
-                <i class="fas fa-sack-dollar"></i></div>
+                <i class="fas fa-sack-dollar"></i>
+              </div>
               <div>
                 <p class="text-xs text-gray-500">Receita do Dia</p>
                 <h3 class="text-lg font-bold" id="kpi-receita">-</h3>
@@ -485,7 +645,8 @@
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-zaya-border flex items-center gap-4">
               <div
                 class="w-12 h-12 bg-orange-100 text-orange-500 rounded-xl flex items-center justify-center text-xl shrink-0">
-                <i class="fas fa-hourglass-half"></i></div>
+                <i class="fas fa-hourglass-half"></i>
+              </div>
               <div>
                 <p class="text-xs text-gray-500">Saldo a Receber</p>
                 <h3 class="text-lg font-bold" id="kpi-saldo">-</h3>
@@ -503,6 +664,7 @@
             <div class="bg-white rounded-2xl border border-zaya-border p-6 shadow-sm flex flex-col">
               <h3 class="text-lg font-bold mb-4">Últimas Conversas</h3>
               <div class="space-y-1 flex-1" id="dash-conversas-list"></div>
+              
               <button onclick="navigate('conversas')"
                 class="w-full mt-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium transition">Ver
                 Todas as Conversas</button>
@@ -510,6 +672,119 @@
           </div>
         </div>
 
+      </div>
+    </main>
+  </div>
+
+  <!-- ============================= LOGICA DE LOGIN E CADASTRO ============================= -->
+  <script>
+    // Alternar visualização entre as telas de autenticação
+    function showAuthScreen(screenId) {
+      document.querySelectorAll('.auth-screen').forEach(screen => screen.classList.add('hidden'));
+      const target = document.getElementById(screenId);
+      if (target) target.classList.remove('hidden');
+    }
+
+    // Sistema de notificações interno (Toast)
+    function showToast(message, type = 'success') {
+      let container = document.getElementById('toast-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        document.body.appendChild(container);
+      }
+      const toast = document.createElement('div');
+      toast.className = `toast ${type === 'error' ? 'toast-error' : ''}`;
+      toast.innerHTML = `
+        <i class="fas ${type === 'error' ? 'fa-exclamation-circle text-red-500' : 'fa-check-circle text-pink-500'}"></i>
+        <span class="text-sm font-medium text-gray-700">${message}</span>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Intercepta e corrige o Login com as suas credenciais
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const emailInput = document.getElementById('login-email').value.trim();
+      const passwordInput = document.getElementById('login-password').value;
+
+      // Validação exata solicitada por você
+      if (emailInput === 'jcaetano.sillva@gmail.com' && passwordInput === '120368jc') {
+        showToast('Login realizado com sucesso!');
+        
+        // Libera o acesso ao painel do Zaya.App
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('app-container').classList.remove('hidden');
+        
+        // Insere seu nome no painel lateral
+        document.getElementById('user-name').innerText = 'J. Caetano Silva';
+        document.getElementById('user-role-badge').innerText = 'Administrador';
+        
+        // Popula os KPIs zerados com dados fictícios para teste
+        document.getElementById('kpi-atendidos').innerText = '14';
+        document.getElementById('kpi-agendados').innerText = '9';
+        document.getElementById('kpi-cancelados').innerText = '0';
+        document.getElementById('kpi-reagendados').innerText = '2';
+        document.getElementById('kpi-receita').innerText = 'R$ 1.850,00';
+        document.getElementById('kpi-saldo').innerText = 'R$ 410,00';
+        
+      } else if (emailInput === 'admin123' && passwordInput === '123321') {
+        // Mantém suporte para credencial demo padrão
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('app-container').classList.remove('hidden');
+      } else {
+        showToast('E-mail ou senha inválidos para este sistema.', 'error');
+      }
+    });
+
+    // Cadastro simulado
+    document.getElementById('signup-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('signup-email').value;
+      const pass = document.getElementById('signup-password').value;
+      const confirmPass = document.getElementById('signup-password-confirm').value;
+
+      if (pass !== confirmPass) {
+        showToast('As senhas digitadas não batem.', 'error');
+        return;
+      }
+
+      document.getElementById('confirm-email-address').innerText = email;
+      showAuthScreen('confirm-email-screen');
+    });
+
+    function logout() {
+      document.getElementById('app-container').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+      document.getElementById('login-email').value = '';
+      document.getElementById('login-password').value = '';
+    }
+
+    function toggleSidebar(open) {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      if (open) {
+        sidebar.classList.add('sidebar-open');
+        overlay.classList.add('overlay-visible');
+      } else {
+        sidebar.classList.remove('sidebar-open');
+        overlay.classList.remove('overlay-visible');
+      }
+    }
+
+    function navigate(target) {
+      document.getElementById('page-title').innerText = target.toUpperCase();
+      toggleSidebar(false);
+    }
+
+    function goHome() {
+      navigate('dashboard');
+    }
+  </script>
+</body>
+</html>
         <!-- ============ PÁGINA: AGENDA ============ -->
         <div id="page-agenda" class="page-content fade-in hidden">
           <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
@@ -550,7 +825,8 @@
                 <h3 class="text-3xl font-bold text-zaya-text" id="kpi-ticket-medio">-</h3>
               </div>
               <div class="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center text-2xl">
-                <i class="fas fa-chart-line"></i></div>
+                <i class="fas fa-chart-line"></i>
+              </div>
             </div>
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-zaya-border flex items-center justify-between">
               <div>
@@ -1477,173 +1753,156 @@
   <div id="toast-container"></div>
 
   <script>
+    const SUPABASE_URL = 'https://nfiielukgpkzotrkykok.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5maWllbHVrZ3Brem90cmt5a29rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNDkyNDEsImV4cCI6MjA5NDgyNTI0MX0.Qol2U_Uboz11ZUMjURx19TFJoaEH61qR1Nw4aMgCUi0';
+    const AUTH_REDIRECT_URL = window.location.origin + window.location.pathname;
+
+    const supabaseClient = (SUPABASE_URL.startsWith('http'))
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+      : null;
+    let pendingConfirmationEmail = null;
+
+    // =====================================================================
+    // HELPERS DE CÁLCULO E DURAÇÃO DA AGENDA
+    // =====================================================================
+    function calcularHoraFim(horaInicioStr, duracaoMinutos) {
+      if (!horaInicioStr) return '';
+      const parts = horaInicioStr.split(':');
+      const h = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10);
+      const totalMinutos = h * 60 + m + duracaoMinutos;
+      const fimH = Math.floor(totalMinutos / 60) % 24;
+      const fimM = totalMinutos % 60;
+      return `${String(fimH).padStart(2, '0')}:${String(fimM).padStart(2, '0')}`;
+    }
+
+    function atualizarCalculosAgendamento(containerId, inicioInputId, fimInputId, valorInputId) {
+      const nomes = getServicosSelecionados(containerId);
+      let somaPreco = 0;
+      let somaDuracao = 0;
+      nomes.forEach(nome => {
+        const serv = state.db.servicos.find(x => x.nome === nome);
+        if (serv) {
+          somaPreco += serv.preco;
+          somaDuracao += serv.duracao || 30; // default 30 min se não definido
+        }
+      });
+
+      const valorInput = document.getElementById(valorInputId);
+      if (valorInput) {
+        valorInput.value = somaPreco.toFixed(2);
+      }
+
+      const inicioInput = document.getElementById(inicioInputId);
+      const fimInput = document.getElementById(fimInputId);
+      if (inicioInput && fimInput && inicioInput.value) {
+        fimInput.value = calcularHoraFim(inicioInput.value, somaDuracao);
+        fimInput.readOnly = true;
+      }
+    }
+
     // =====================================================================
     // ESTADO DA APLICAÇÃO
     // =====================================================================
     const state = {
-      currentUser: null, // { scope: 'salon'|'saas', role: 'admin'|'owner'|'saas_admin', name }
+      currentUser: null,
       activePage: 'dashboard',
       agenda: { view: '2dias', baseDate: (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; })() },
       conversas: { activeId: 1 },
 
-      // ---------------- MOCK DB DO SALÃO (simula tabelas empresa-scoped) ----------------
       db: {
-        clients: [
-          { id: 1, name: "Carolina", phone: "5511999999991", visits: 12, totalSpent: 1324.00, dob: fixedDobThisYear(7, 22) },
-          { id: 2, name: "Cassiana", phone: "5511999999992", visits: 8, totalSpent: 1226.00, dob: upcomingDobIn(3) },
-          { id: 3, name: "Dayana", phone: "5511999999993", visits: 5, totalSpent: 1217.00, dob: fixedDobThisYear(5, 15) },
-          { id: 4, name: "Roberta", phone: "5511999999994", visits: 3, totalSpent: 1205.00, dob: fixedDobThisYear(11, 20) },
-          { id: 5, name: "Bruna", phone: "5511999999995", visits: 1, totalSpent: 1193.00, dob: upcomingDobIn(0) },
-          { id: 6, name: "Marilza", phone: "5511999999996", visits: 0, totalSpent: 1090.00, dob: fixedDobThisYear(1, 10), lastVisitDaysAgo: 60 },
-          { id: 7, name: "Aline", phone: "5511999999997", visits: 2, totalSpent: 340.00, dob: fixedDobThisYear(3, 4) },
-          { id: 8, name: "Valdete", phone: "5511999999998", visits: 4, totalSpent: 512.00, dob: fixedDobThisYear(9, 9) },
-          { id: 9, name: "Maria Clara", phone: "5511999999999", visits: 1, totalSpent: 800.00, dob: fixedDobThisYear(2, 2), lastVisitDaysAgo: 50 },
         ],
-        agendamentos: [
-          { id: 'AG101', clientId: 7, cliente: "Aline", servicos: ["Maquiagem Profissional"], categoria: "purple", data: offsetDateKey(0), inicio: "08:00", fim: "09:00", valor: 180, statusAgendamento: "Atendido", statusFinanceiro: "Sinal Pago", canceladoEm: null },
-          { id: 'AG102', clientId: 9, cliente: "Maria Clara", servicos: ["Extensão de Cílios"], categoria: "purple", data: offsetDateKey(0), inicio: "10:00", fim: "12:00", valor: 650, statusAgendamento: "Pendente", statusFinanceiro: "Sem Sinal", canceladoEm: null },
-          { id: 'AG103', clientId: 8, cliente: "Valdete", servicos: ["Design de Sobrancelhas"], categoria: "purple", data: offsetDateKey(0), inicio: "13:00", fim: "13:30", valor: 60, statusAgendamento: "Cancelado", statusFinanceiro: "Sinal Pago", canceladoEm: offsetDateKey(0) },
-          { id: 'AG104', clientId: 5, cliente: "Bruna", servicos: ["Penteados"], categoria: "blue", data: offsetDateKey(1), inicio: "09:00", fim: "10:00", valor: 150, statusAgendamento: "Reagendado", statusFinanceiro: "Total Pago", canceladoEm: null },
-        ],
-        cobrancas: [
-          { id: "AG001", client: "Marilza", date: "21/01", services: "Buço + Cava", total: 82.00, status: "Confirmado", isPaid: true },
-          { id: "AG002", client: "Taiane", date: "23/09", services: "Sobrancelha", total: 28.00, status: "Aguardando sinal", isPaid: false },
-          { id: "AG003", client: "Gleice", date: "17/12", services: "Retoque de micro", total: 130.00, status: "Aguardando sinal", isPaid: false }
-        ],
-        caixa: [
-          { data: mesAtualDia(1), cliente: "Marilza", descricao: "Buço + Cava (Sinal)", metodo: "PIX", origem: "Manual", valor: 41.00 },
-          { data: mesAtualDia(2), cliente: "Roberta", descricao: "Massagem (Restante)", metodo: "Cartão Crédito", origem: "Manual", valor: 60.00 },
-          { data: mesAtualDia(2), cliente: "Compra de Materiais", descricao: "Fornecedor X", metodo: "Dinheiro", origem: "Manual", valor: -150.00 },
-        ],
-        caixaHistorico: [], // lançamentos mais antigos que o mês anterior, arquivados fora do banco ativo (ver arquivarLancamentosAntigos)
-        profissionais: [
-          { nome: "Mychelle", especialidade: "Esteticista", comissao: 30, ativo: true },
-          { nome: "Fernanda", especialidade: "Maquiadora", comissao: 25, ativo: true },
-          { nome: "Débora", especialidade: "Designer de Sobrancelhas", comissao: 20, ativo: true },
-        ],
-        produtosEstoque: [
-          { id: 'PD001', nome: "Cera Depilatória", marca: "DepilFácil", precoCusto: 12.00, precoVenda: 25.00, detalhes: "Cera quente para depilação facial e corporal.", quantidade: 4, foto: "https://placehold.co/300x200/FFE4E1/7B2FF7?text=Cera" },
-          { id: 'PD002', nome: "Henna para Sobrancelha", marca: "BrowColor", precoCusto: 8.00, precoVenda: 18.00, detalhes: "Henna profissional para coloração de sobrancelhas.", quantidade: 12, foto: "https://placehold.co/300x200/FFE4E1/7B2FF7?text=Henna" },
-          { id: 'PD003', nome: "Óleo de Massagem", marca: "RelaxOil", precoCusto: 15.00, precoVenda: 32.00, detalhes: "Óleo hidratante para massagens relaxantes.", quantidade: 2, foto: "https://placehold.co/300x200/FFE4E1/7B2FF7?text=%C3%93leo" },
-        ],
-        servicos: [
-          { id: 'SV001', categoria: "Cabelos", nome: "Corte Feminino", preco: 80.00, detalhes: "Cortes tradicionais, repicados, em camadas, franjas, etc.", foto: "https://placehold.co/300x200/FFE4E1/FF6FB5?text=Corte+Feminino" },
-          { id: 'SV002', categoria: "Cabelos", nome: "Corte Masculino", preco: 40.00, detalhes: "Cortes na tesoura ou máquina e acabamentos.", foto: "https://placehold.co/300x200/FFE4E1/FF6FB5?text=Corte+Masculino" },
-          { id: 'SV003', categoria: "Cabelos", nome: "Escova e Modelagem", preco: 60.00, detalhes: "Secagem com secador para alisar ou modelar os fios.", foto: "https://placehold.co/300x200/FFE4E1/FF6FB5?text=Escova" },
-          { id: 'SV004', categoria: "Cabelos", nome: "Coloração e Tintura", preco: 150.00, detalhes: "Tingimento completo dos fios para cobertura de brancos ou mudança de cor.", foto: "https://placehold.co/300x200/FFE4E1/FF6FB5?text=Colora%C3%A7%C3%A3o" },
-          { id: 'SV005', categoria: "Cabelos", nome: "Luzes, Mechas ou Reflexos", preco: 220.00, detalhes: "Técnicas de clareamento (balayage, ombré hair, etc.).", foto: "https://placehold.co/300x200/FFE4E1/FF6FB5?text=Mechas" },
-          { id: 'SV006', categoria: "Cabelos", nome: "Hidratação Capilar", preco: 90.00, detalhes: "Tratamento para reposição de água e maciez dos fios.", foto: "https://placehold.co/300x200/FFE4E1/FF6FB5?text=Hidrata%C3%A7%C3%A3o" },
-          { id: 'SV007', categoria: "Cabelos", nome: "Reconstrução Capilar / Cronograma", preco: 180.00, detalhes: "Tratamento profundo para cabelos danificados com queratina e vitaminas.", foto: "https://placehold.co/300x200/FFE4E1/FF6FB5?text=Reconstru%C3%A7%C3%A3o" },
-          { id: 'SV008', categoria: "Cabelos", nome: "Alisamento ou Escova Progressiva", preco: 250.00, detalhes: "Redução de volume e alisamento prolongado dos fios.", foto: "https://placehold.co/300x200/FFE4E1/FF6FB5?text=Alisamento" },
-          { id: 'SV009', categoria: "Cabelos", nome: "Penteados", preco: 120.00, detalhes: "Preparações elaboradas para festas, casamentos e formaturas.", foto: "https://placehold.co/300x200/FFE4E1/FF6FB5?text=Penteados" },
-          { id: 'SV010', categoria: "Unhas", nome: "Manicure Clássica", preco: 35.00, detalhes: "Corte, lixamento, remoção de cutículas e esmaltação das mãos.", foto: "https://placehold.co/300x200/F3E8FF/7B2FF7?text=Manicure" },
-          { id: 'SV011', categoria: "Unhas", nome: "Pedicure Clássica", preco: 40.00, detalhes: "Cuidado estético e higiênico das unhas dos pés.", foto: "https://placehold.co/300x200/F3E8FF/7B2FF7?text=Pedicure" },
-          { id: 'SV012', categoria: "Unhas", nome: "Alongamento de Unhas", preco: 100.00, detalhes: "Técnicas usando gel, fibra de vidro ou acrílico.", foto: "https://placehold.co/300x200/F3E8FF/7B2FF7?text=Alongamento" },
-          { id: 'SV013', categoria: "Unhas", nome: "Esmaltação em Gel", preco: 60.00, detalhes: "Aplicação de esmalte de alta durabilidade seco em cabine UV/LED.", foto: "https://placehold.co/300x200/F3E8FF/7B2FF7?text=Esmalte+Gel" },
-          { id: 'SV014', categoria: "Unhas", nome: "Spa dos Pés / Plástica dos Pés", preco: 70.00, detalhes: "Esfoliação, hidratação profunda e remoção de calosidades.", foto: "https://placehold.co/300x200/F3E8FF/7B2FF7?text=Spa+dos+P%C3%A9s" },
-          { id: 'SV015', categoria: "Estética Facial e Olhar", nome: "Design de Sobrancelhas", preco: 30.00, detalhes: "Limpeza e desenho simétrico das sobrancelhas com pinça ou linha.", foto: "https://placehold.co/300x200/FFF5F7/FF6FB5?text=Sobrancelhas" },
-          { id: 'SV016', categoria: "Estética Facial e Olhar", nome: "Coloração ou Henna para Sobrancelhas", preco: 35.00, detalhes: "Preenchimento de falhas e realce do olhar.", foto: "https://placehold.co/300x200/FFF5F7/FF6FB5?text=Henna+Sobrancelha" },
-          { id: 'SV017', categoria: "Estética Facial e Olhar", nome: "Extensão de Cílios", preco: 150.00, detalhes: "Colagem de fios sintéticos para dar volume e comprimento.", foto: "https://placehold.co/300x200/FFF5F7/FF6FB5?text=C%C3%ADlios" },
-          { id: 'SV018', categoria: "Estética Facial e Olhar", nome: "Limpeza de Pele", preco: 120.00, detalhes: "Remoção de cravos, impurezas e células mortas do rosto.", foto: "https://placehold.co/300x200/FFF5F7/FF6FB5?text=Limpeza+de+Pele" },
-          { id: 'SV019', categoria: "Estética Facial e Olhar", nome: "Maquiagem Profissional", preco: 180.00, detalhes: "Make completa para o dia a dia, eventos noturnos ou noivas.", foto: "https://placehold.co/300x200/FFF5F7/FF6FB5?text=Maquiagem" },
-          { id: 'SV020', categoria: "Depilação e Estética Corporal", nome: "Depilação com Cera", preco: 50.00, detalhes: "Remoção de pelos faciais (buço, rosto) e corporais (pernas, axilas, virilha).", foto: "https://placehold.co/300x200/FFE4E1/7B2FF7?text=Depila%C3%A7%C3%A3o" },
-        ],
-        servicosVendidos: [
-          { nome: "Micropigmentação", qtd: 14, receita: 9100 },
-          { nome: "Design de Sobrancelha", qtd: 38, receita: 2280 },
-          { nome: "Maquiagem Completa", qtd: 21, receita: 3780 },
-        ],
-        // ---- Conversas: cada conversa tem seu próprio histórico de mensagens ----
-        conversas: [
-          {
-            id: 1, nome: "Juliana Santos", avatarLetra: "J", status: "respondido", naoLidas: 0,
-            servico: "Limpeza de Pele + Hidratação", valor: 220.00,
-            ultimaMensagem: "Quero sim! Pode me mandar o link ou PIX do sinal?", ultimaHora: "09:18",
-            mensagens: [
-              { de: "cliente", texto: "Oi. Minha limpeza está agendada para 18/06 às 10:00, correto? Preciso confirmar se vocês fazem hidratação facial também.", hora: "15 Jun 09:12" },
-              { de: "salao", texto: "Olá, Juliana! Sim, seu horário está reservado aguardando o sinal. Fazemos hidratação facial sim! Gostaria de incluir no pacote?", hora: "09:15" },
-              { de: "cliente", texto: "Quero sim! Pode me mandar o link ou PIX do sinal?", hora: "09:18" },
-            ]
-          },
-          {
-            id: 2, nome: "Jocyel Caetano", avatarLetra: "J", status: "aguardando_resposta", naoLidas: 2,
-            servico: "Canal (Dente 36)", valor: 380.00,
-            ultimaMensagem: "Também queria saber o preço.", ultimaHora: "10:41",
-            mensagens: [
-              { de: "cliente", texto: "Olá! Gostaria de agendar um Canal para o dia 14/06 às 15:00.", hora: "10:40" },
-              { de: "cliente", texto: "Também queria saber o preço.", hora: "10:41" },
-            ]
-          },
-          {
-            id: 3, nome: "Ana Paula", avatarLetra: "A", status: "aguardando_resposta", naoLidas: 1,
-            servico: "Restauração + Clareamento", valor: 1200.00,
-            ultimaMensagem: "Quanto ficaria com clareamento incluído?", ultimaHora: "11:02",
-            mensagens: [
-              { de: "cliente", texto: "Olá. Para dia 14/06 às 17:00, gostaria de agendar uma Restauração.", hora: "11:00" },
-              { de: "cliente", texto: "Quanto ficaria com clareamento incluído?", hora: "11:02" },
-            ]
-          },
-          {
-            id: 4, nome: "Vinícius da Silva", avatarLetra: "V", status: "finalizado", naoLidas: 0,
-            servico: "Orçamento Geral", valor: 150.00,
-            ultimaMensagem: "Perfeito, confirmado então! Até lá 👋", ultimaHora: "Ontem",
-            mensagens: [
-              { de: "cliente", texto: "Bom dia. Gostaria de um Orçamento geral. Tenho alguns horários livres no dia 14/06. O horário de 18:00 ainda está disponível?", hora: "Ontem 09:00" },
-              { de: "salao", texto: "Bom dia, Vinícius! Sim, o horário de 18:00 está livre. Já reservei para você.", hora: "Ontem 09:20" },
-              { de: "cliente", texto: "Perfeito, confirmado então! Até lá 👋", hora: "Ontem 09:22" },
-            ]
-          },
+    // ---- Conversas: cada conversa tem seu próprio histórico de mensagens ----
+    conversas: [
+      {
+        id: 1, nome: "Juliana Santos", avatarLetra: "J", status: "respondido", naoLidas: 0,
+        servico: "Limpeza de Pele + Hidratação", valor: 220.00,
+        ultimaMensagem: "Quero sim! Pode me mandar o link ou PIX do sinal?", ultimaHora: "09:18",
+        mensagens: [
+          { de: "cliente", texto: "Oi. Minha limpeza está agendada para 18/06 às 10:00, correto? Preciso confirmar se vocês fazem hidratação facial também.", hora: "15 Jun 09:12" },
+          { de: "salao", texto: "Olá, Juliana! Sim, seu horário está reservado aguardando o sinal. Fazemos hidratação facial sim! Gostaria de incluir no pacote?", hora: "09:15" },
+          { de: "cliente", texto: "Quero sim! Pode me mandar o link ou PIX do sinal?", hora: "09:18" },
         ]
       },
+      {
+        id: 2, nome: "Jocyel Caetano", avatarLetra: "J", status: "aguardando_resposta", naoLidas: 2,
+        servico: "Canal (Dente 36)", valor: 380.00,
+        ultimaMensagem: "Também queria saber o preço.", ultimaHora: "10:41",
+        mensagens: [
+          { de: "cliente", texto: "Olá! Gostaria de agendar um Canal para o dia 14/06 às 15:00.", hora: "10:40" },
+          { de: "cliente", texto: "Também queria saber o preço.", hora: "10:41" },
+        ]
+      },
+      {
+        id: 3, nome: "Ana Paula", avatarLetra: "A", status: "aguardando_resposta", naoLidas: 1,
+        servico: "Restauração + Clareamento", valor: 1200.00,
+        ultimaMensagem: "Quanto ficaria com clareamento incluído?", ultimaHora: "11:02",
+        mensagens: [
+          { de: "cliente", texto: "Olá. Para dia 14/06 às 17:00, gostaria de agendar uma Restauração.", hora: "11:00" },
+          { de: "cliente", texto: "Quanto ficaria com clareamento incluído?", hora: "11:02" },
+        ]
+      },
+      {
+        id: 4, nome: "Vinícius da Silva", avatarLetra: "V", status: "finalizado", naoLidas: 0,
+        servico: "Orçamento Geral", valor: 150.00,
+        ultimaMensagem: "Perfeito, confirmado então! Até lá 👋", ultimaHora: "Ontem",
+        mensagens: [
+          { de: "cliente", texto: "Bom dia. Gostaria de um Orçamento geral. Tenho alguns horários livres no dia 14/06. O horário de 18:00 ainda está disponível?", hora: "Ontem 09:00" },
+          { de: "salao", texto: "Bom dia, Vinícius! Sim, o horário de 18:00 está livre. Já reservei para você.", hora: "Ontem 09:20" },
+          { de: "cliente", texto: "Perfeito, confirmado então! Até lá 👋", hora: "Ontem 09:22" },
+        ]
+      },
+    ]
+      },
 
-      // ---------------- MOCK DB DO SAAS (dados globais da plataforma Zaya.App) ----------------
-      saasDb: {
-        empresas: [
-          { nome: "Salão Zaya Beauty", plano: "Pro", usuarios: 4, status: "Ativa", cadastro: "10/01/2024" },
-          { nome: "Studio Bella Hair", plano: "Business", usuarios: 9, status: "Ativa", cadastro: "22/02/2024" },
-          { nome: "Espaço Clara Estética", plano: "Starter", usuarios: 2, status: "Trial", cadastro: "01/06/2024" },
-          { nome: "Charme Nails", plano: "Pro", usuarios: 3, status: "Ativa", cadastro: "14/03/2024" },
-        ],
+    // ---------------- MOCK DB DO SAAS (dados globais da plataforma Zaya.App) ----------------
+    saasDb: {
+      empresas: [
+        { nome: "Salão Zaya Beauty", plano: "Pro", usuarios: 4, status: "Ativa", cadastro: "10/01/2024" },
+        { nome: "Studio Bella Hair", plano: "Business", usuarios: 9, status: "Ativa", cadastro: "22/02/2024" },
+        { nome: "Espaço Clara Estética", plano: "Starter", usuarios: 2, status: "Trial", cadastro: "01/06/2024" },
+        { nome: "Charme Nails", plano: "Pro", usuarios: 3, status: "Ativa", cadastro: "14/03/2024" },
+      ],
         planos: [
           { nome: "Starter", preco: 79.90, recursos: ["1 profissional", "Agenda e Clientes", "Cobrança de sinal"] },
           { nome: "Pro", preco: 149.90, recursos: ["Até 5 profissionais", "CRM completo", "Fluxo de caixa com IA"] },
           { nome: "Business", preco: 299.90, recursos: ["Profissionais ilimitados", "Estoque e Relatórios", "Suporte prioritário"] },
         ],
-        assinaturas: [
-          { empresa: "Salão Zaya Beauty", plano: "Pro", status: "Ativa", proxima: "05/08/2026" },
-          { empresa: "Studio Bella Hair", plano: "Business", status: "Ativa", proxima: "12/08/2026" },
-          { empresa: "Espaço Clara Estética", plano: "Starter", status: "Trial", proxima: "18/07/2026" },
-          { empresa: "Charme Nails", plano: "Pro", status: "Atrasada", proxima: "01/07/2026" },
-        ],
-        cobrancas: [
-          { empresa: "Salão Zaya Beauty", valor: 149.90, vencimento: "05/07/2026", metodo: "Cartão", status: "Pago" },
-          { empresa: "Studio Bella Hair", valor: 299.90, vencimento: "12/07/2026", metodo: "PIX", status: "Pago" },
-          { empresa: "Charme Nails", valor: 149.90, vencimento: "01/07/2026", metodo: "Boleto", status: "Atrasado" },
-        ],
-        usuarios: [
-          { nome: "Administradora Zaya Beauty", empresa: "Salão Zaya Beauty", perfil: "salon_admin", status: "Ativo" },
-          { nome: "Proprietária Zaya Beauty", empresa: "Salão Zaya Beauty", perfil: "salon_owner", status: "Ativo" },
-          { nome: "Admin Bella Hair", empresa: "Studio Bella Hair", perfil: "salon_admin", status: "Ativo" },
-        ],
-        perfis: [
-          { nome: "saas_admin", escopo: "SaaS", descricao: "Acesso total à plataforma: empresas, planos, cobranças e configurações globais." },
-          { nome: "salon_admin", escopo: "Salão", descricao: "Acesso operacional total dentro do salão: agenda, clientes, caixa, cobranças." },
-          { nome: "salon_owner", escopo: "Salão", descricao: "Acesso gerencial de leitura dentro do salão, sem ações de escrita." },
-          { nome: "profissional", escopo: "Salão", descricao: "Acesso restrito à própria agenda e atendimentos (futuro)." },
-        ],
-        apiKeys: [
-          { nome: "Integração n8n Produção", prefixo: "zya_live_8f2c...", ultimoUso: "Hoje, 08:12", status: "Ativa" },
-        ],
-        webhooks: [
-          { nome: "Novo Cliente", url: "https://n8n.zaya.app/webhook/novo-cliente", evento: "cliente.criado", status: "Ativo" },
-          { nome: "Comprovante de Pagamento", url: "https://n8n.zaya.app/webhook/comprovante-pagamento", evento: "pagamento.comprovante_recebido", status: "Ativo" },
-          { nome: "Novo Agendamento", url: "https://n8n.zaya.app/webhook/agendamentos", evento: "agendamento.criado", status: "Ativo" },
-        ],
-        logs: [
-          { data: "04/07/2026 09:12", usuario: "admin123", acao: "CREATE", entidade: "clientes", ip: "191.12.44.2" },
-          { data: "04/07/2026 08:50", usuario: "saas123", acao: "UPDATE", entidade: "planos", ip: "191.12.44.9" },
-          { data: "03/07/2026 22:40", usuario: "prop123", acao: "READ", entidade: "fluxo_caixa", ip: "191.12.44.2" },
-        ],
+          assinaturas: [
+            { empresa: "Salão Zaya Beauty", plano: "Pro", status: "Ativa", proxima: "05/08/2026" },
+            { empresa: "Studio Bella Hair", plano: "Business", status: "Ativa", proxima: "12/08/2026" },
+            { empresa: "Espaço Clara Estética", plano: "Starter", status: "Trial", proxima: "18/07/2026" },
+            { empresa: "Charme Nails", plano: "Pro", status: "Atrasada", proxima: "01/07/2026" },
+          ],
+            cobrancas: [
+              { empresa: "Salão Zaya Beauty", valor: 149.90, vencimento: "05/07/2026", metodo: "Cartão", status: "Pago" },
+              { empresa: "Studio Bella Hair", valor: 299.90, vencimento: "12/07/2026", metodo: "PIX", status: "Pago" },
+              { empresa: "Charme Nails", valor: 149.90, vencimento: "01/07/2026", metodo: "Boleto", status: "Atrasado" },
+            ],
+              usuarios: [
+                { nome: "Administradora Zaya Beauty", empresa: "Salão Zaya Beauty", perfil: "salon_admin", status: "Ativo" },
+                { nome: "Proprietária Zaya Beauty", empresa: "Salão Zaya Beauty", perfil: "salon_owner", status: "Ativo" },
+                { nome: "Admin Bella Hair", empresa: "Studio Bella Hair", perfil: "salon_admin", status: "Ativo" },
+              ],
+                perfis: [
+                  { nome: "saas_admin", escopo: "SaaS", descricao: "Acesso total à plataforma: empresas, planos, cobranças e configurações globais." },
+                  { nome: "salon_admin", escopo: "Salão", descricao: "Acesso operacional total dentro do salão: agenda, clientes, caixa, cobranças." },
+                  { nome: "salon_owner", escopo: "Salão", descricao: "Acesso gerencial de leitura dentro do salão, sem ações de escrita." },
+                  { nome: "profissional", escopo: "Salão", descricao: "Acesso restrito à própria agenda e atendimentos (futuro)." },
+                ],
+                  apiKeys: [
+                    { nome: "Integração n8n Produção", prefixo: "zya_live_8f2c...", ultimoUso: "Hoje, 08:12", status: "Ativa" },
+                  ],
+                    webhooks: [
+                      { nome: "Novo Cliente", url: "https://n8n.zaya.app/webhook/novo-cliente", evento: "cliente.criado", status: "Ativo" },
+                      { nome: "Comprovante de Pagamento", url: "https://n8n.zaya.app/webhook/comprovante-pagamento", evento: "pagamento.comprovante_recebido", status: "Ativo" },
+                      { nome: "Novo Agendamento", url: "https://n8n.zaya.app/webhook/agendamentos", evento: "agendamento.criado", status: "Ativo" },
+                    ],
+                      logs: [
+                        { data: "04/07/2026 09:12", usuario: "admin123", acao: "CREATE", entidade: "clientes", ip: "191.12.44.2" },
+                        { data: "04/07/2026 08:50", usuario: "saas123", acao: "UPDATE", entidade: "planos", ip: "191.12.44.9" },
+                        { data: "03/07/2026 22:40", usuario: "prop123", acao: "READ", entidade: "fluxo_caixa", ip: "191.12.44.2" },
+                      ],
       }
     };
 
@@ -1697,13 +1956,16 @@
       const container = document.getElementById(containerId);
       if (!container) return;
       const categorias = [...new Set(state.db.servicos.map(s => s.categoria))];
+      const prefix = containerId.substring(0, 3); // 'na-' or 'ag-'
+      const inicioInputId = prefix + 'inicio';
+      const fimInputId = prefix + 'fim';
       container.innerHTML = categorias.map(cat => `
     <div class="mb-2">
       <p class="text-[10px] uppercase tracking-wide text-gray-400 font-bold mb-1">${cat}</p>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-1">
         ${state.db.servicos.filter(s => s.categoria === cat).map(s => `
           <label class="flex items-center gap-2 text-sm">
-            <input type="checkbox" value="${s.nome}" class="servico-checkbox" ${selecionados.includes(s.nome) ? 'checked' : ''} onchange="atualizarValorSugerido('${containerId}', '${valorInputId}')">
+            <input type="checkbox" value="${s.nome}" class="servico-checkbox" ${selecionados.includes(s.nome) ? 'checked' : ''} onchange="atualizarCalculosAgendamento('${containerId}', '${inicioInputId}', '${fimInputId}', '${valorInputId}')">
             ${s.nome}
           </label>
         `).join('')}
@@ -1711,17 +1973,22 @@
     </div>
   `).join('');
     }
+
     function getServicosSelecionados(containerId) {
       const container = document.getElementById(containerId);
       if (!container) return [];
       return [...container.querySelectorAll('.servico-checkbox:checked')].map(cb => cb.value);
     }
-    function atualizarValorSugerido(containerId, valorInputId) {
-      const nomes = getServicosSelecionados(containerId);
-      const soma = nomes.reduce((s, nome) => { const serv = state.db.servicos.find(x => x.nome === nome); return s + (serv ? serv.preco : 0); }, 0);
-      const input = document.getElementById(valorInputId);
-      if (input) input.value = soma.toFixed(2);
-    }
+
+    // Listener para o campo de início do novo agendamento
+    document.addEventListener('DOMContentLoaded', () => {
+      const naInicio = document.getElementById('na-inicio');
+      if (naInicio) {
+        naInicio.addEventListener('change', () => {
+          atualizarCalculosAgendamento('na-servicos-checklist', 'na-inicio', 'na-fim', 'na-valor');
+        });
+      }
+    });
 
     // =====================================================================
     // REGRA DE NEGÓCIO: CLASSIFICAÇÃO CRM
@@ -1764,23 +2031,346 @@
     // =====================================================================
     // LOGIN / LOGOUT / PERMISSÕES
     // =====================================================================
-    document.getElementById('login-form').addEventListener('submit', function (e) {
+    function showAuthScreen(screenId) {
+      document.querySelectorAll('.auth-screen').forEach(el => el.classList.add('hidden'));
+      const target = document.getElementById(screenId);
+      if (target) target.classList.remove('hidden');
+      document.getElementById('app-container').classList.add('hidden');
+    }
+
+    // Login híbrido: aceita os 3 usuários mockados de demonstração OU e-mail/senha real via Supabase Auth.
+    document.getElementById('login-form').addEventListener('submit', async function (e) {
       e.preventDefault();
-      const user = document.getElementById('login-user').value.toLowerCase().trim();
-      const pass = document.getElementById('login-pass').value;
+      const identifier = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-password').value;
       if (!pass) { showToast('Informe uma senha', 'error'); return; }
 
-      if (user === 'admin123') login({ scope: 'salon', role: 'admin', name: 'Administrador do Salão' });
-      else if (user === 'prop123') login({ scope: 'salon', role: 'owner', name: 'Proprietária (Leitura)' });
-      else if (user === 'saas123') login({ scope: 'saas', role: 'saas_admin', name: 'Admin Zaya.App (SaaS)' });
-      else showToast('Credenciais inválidas. Use admin123, prop123 ou saas123', 'error');
+      const mockUser = identifier.toLowerCase();
+      if (mockUser === 'admin123') { login({ scope: 'salon', role: 'admin', name: 'Administrador do Salão' }); return; }
+      if (mockUser === 'prop123') { login({ scope: 'salon', role: 'owner', name: 'Proprietária (Leitura)' }); return; }
+      if (mockUser === 'saas123') { login({ scope: 'saas', role: 'saas_admin', name: 'Admin Zaya.App (SaaS)' }); return; }
+
+      if (!supabaseClient) { showToast('Configure SUPABASE_URL e SUPABASE_ANON_KEY no código para usar login por e-mail.', 'error'); return; }
+
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      const { error } = await supabaseClient.auth.signInWithPassword({ email: identifier, password: pass });
+      submitBtn.disabled = false;
+
+      if (error) {
+        if (/email not confirmed/i.test(error.message)) {
+          pendingConfirmationEmail = identifier;
+          document.getElementById('confirm-email-address').innerText = identifier;
+          showAuthScreen('confirm-email-screen');
+          showToast('Confirme seu e-mail antes de acessar o Zaya.App.', 'error');
+        } else {
+          showToast('E-mail ou senha inválidos.', 'error');
+        }
+        return;
+      }
+      // onAuthStateChange assume o login() assim que a sessão confirmada chegar.
     });
 
-    function login(userObj) {
+    document.getElementById('signup-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const name = document.getElementById('signup-name').value.trim();
+      const email = document.getElementById('signup-email').value.trim();
+      const pass = document.getElementById('signup-password').value;
+      const passConfirm = document.getElementById('signup-password-confirm').value;
+
+      if (pass !== passConfirm) { showToast('As senhas não coincidem.', 'error'); return; }
+      if (pass.length < 6) { showToast('A senha deve ter pelo menos 6 caracteres.', 'error'); return; }
+      if (!supabaseClient) { showToast('Configure SUPABASE_URL e SUPABASE_ANON_KEY no código para criar contas.', 'error'); return; }
+
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      const { error } = await supabaseClient.auth.signUp({
+        email, password: pass,
+        options: { data: { full_name: name }, emailRedirectTo: AUTH_REDIRECT_URL }
+      });
+      submitBtn.disabled = false;
+
+      if (error) { showToast(error.message, 'error'); return; }
+
+      pendingConfirmationEmail = email;
+      document.getElementById('confirm-email-address').innerText = email;
+      showAuthScreen('confirm-email-screen');
+      showToast('Cadastro realizado! Confirme seu e-mail para acessar o Zaya.App.');
+      e.target.reset();
+    });
+
+    let resendCooldownTimer = null;
+    function startResendCooldown(seconds) {
+      const btn = document.getElementById('resend-confirm-btn');
+      const originalLabel = 'Reenviar e-mail de confirmação';
+      let remaining = seconds;
+      btn.disabled = true;
+      clearInterval(resendCooldownTimer);
+      btn.innerText = `Reenviar em ${remaining}s`;
+      resendCooldownTimer = setInterval(() => {
+        remaining -= 1;
+        if (remaining <= 0) {
+          clearInterval(resendCooldownTimer);
+          btn.disabled = false;
+          btn.innerText = originalLabel;
+        } else {
+          btn.innerText = `Reenviar em ${remaining}s`;
+        }
+      }, 1000);
+    }
+
+    async function resendConfirmationEmail() {
+      if (!supabaseClient || !pendingConfirmationEmail) {
+        showToast('Faça login novamente informando seu e-mail para reenviar a confirmação.', 'error');
+        return;
+      }
+      const { error } = await supabaseClient.auth.resend({
+        type: 'signup', email: pendingConfirmationEmail, options: { emailRedirectTo: AUTH_REDIRECT_URL }
+      });
+      if (error) showToast(error.message, 'error');
+      else showToast('E-mail de confirmação reenviado!');
+      startResendCooldown(30);
+    }
+
+    document.getElementById('forgot-password-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const email = document.getElementById('forgot-email').value.trim();
+      if (!supabaseClient) { showToast('Configure SUPABASE_URL e SUPABASE_ANON_KEY no código para usar a recuperação de senha.', 'error'); return; }
+
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: AUTH_REDIRECT_URL });
+      submitBtn.disabled = false;
+
+      if (error) { showToast(error.message, 'error'); return; }
+      showToast('Enviamos um link de redefinição de senha para o seu e-mail.');
+      e.target.reset();
+      showAuthScreen('login-screen');
+    });
+
+    document.getElementById('reset-password-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const pass = document.getElementById('reset-password').value;
+      const passConfirm = document.getElementById('reset-password-confirm').value;
+      if (pass !== passConfirm) { showToast('As senhas não coincidem.', 'error'); return; }
+      if (pass.length < 6) { showToast('A senha deve ter pelo menos 6 caracteres.', 'error'); return; }
+      if (!supabaseClient) { showToast('Configure SUPABASE_URL e SUPABASE_ANON_KEY no código.', 'error'); return; }
+
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      const { error } = await supabaseClient.auth.updateUser({ password: pass });
+      submitBtn.disabled = false;
+
+      if (error) { showToast(error.message, 'error'); return; }
+      showToast('Senha redefinida com sucesso! Faça login com sua nova senha.');
+      await supabaseClient.auth.signOut();
+      e.target.reset();
+      showAuthScreen('login-screen');
+    });
+
+    async function loginWithGoogle() {
+      if (!supabaseClient) { showToast('Configure SUPABASE_URL e SUPABASE_ANON_KEY no código para usar login com Google.', 'error'); return; }
+      const { error } = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: AUTH_REDIRECT_URL } });
+      if (error) showToast(error.message, 'error');
+    }
+
+    function mapSupabaseUserToAppUser(user) {
+      return {
+        scope: 'salon',
+        role: 'admin',
+        name: (user.user_metadata && user.user_metadata.full_name) || user.email,
+        email: user.email,
+        isSupabaseUser: true
+      };
+    }
+
+    // Ouve os eventos de autenticação do Supabase (inclui o estado inicial da sessão ao carregar a página,
+    // login/logout, refresh de token e o fluxo de recuperação de senha vindo do link de e-mail).
+    if (supabaseClient) {
+      supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'PASSWORD_RECOVERY') { showAuthScreen('reset-password-screen'); return; }
+
+        if (event === 'SIGNED_OUT') {
+          if (state.currentUser && state.currentUser.isSupabaseUser) logout();
+          return;
+        }
+
+        if (session && session.user && ['SIGNED_IN', 'INITIAL_SESSION', 'TOKEN_REFRESHED', 'USER_UPDATED'].includes(event)) {
+          if (session.user.email_confirmed_at) {
+            if (!state.currentUser || state.currentUser.email !== session.user.email) {
+              await login(mapSupabaseUserToAppUser(session.user));
+            }
+          } else {
+            pendingConfirmationEmail = session.user.email;
+            document.getElementById('confirm-email-address').innerText = session.user.email;
+            showAuthScreen('confirm-email-screen');
+          }
+          return;
+        }
+
+        if (event === 'INITIAL_SESSION' && !session) {
+          const savedUser = localStorage.getItem('zaya_user');
+          if (savedUser) {
+            const parsed = JSON.parse(savedUser);
+            if (!parsed.isSupabaseUser) { await login(parsed); return; }
+          }
+          showAuthScreen('login-screen');
+        }
+      });
+    }
+
+    async function syncFromSupabase() {
+      if (!supabaseClient) return;
+      try {
+        const { data: clientsData, error: clientsError } = await supabaseClient
+          .from('clientes')
+          .select('*')
+          .order('nome', { ascending: true });
+        if (clientsError) throw clientsError;
+
+        const { data: servicesData, error: servicesError } = await supabaseClient
+          .from('servicos')
+          .select('*, categorias_servicos(nome)')
+          .order('nome', { ascending: true });
+        if (servicesError) throw servicesError;
+
+        const { data: agData, error: agError } = await supabaseClient
+          .from('agendamentos')
+          .select(`
+            id,
+            cliente_id,
+            data,
+            hora_inicio,
+            hora_fim,
+            valor_total,
+            status,
+            status_financeiro,
+            observacoes,
+            motivo_cancelamento,
+            cancelado_em,
+            reagendado_para,
+            clientes (nome, telefone),
+            agendamento_servicos (
+              valor,
+              duracao,
+              servicos (nome)
+            )
+          `)
+          .order('hora_inicio', { ascending: true });
+        if (agError) throw agError;
+
+        state.db.clients = (clientsData || []).map(c => {
+          const clientAgs = (agData || []).filter(a => a.cliente_id === c.id && a.status === 'Atendido');
+          const visits = clientAgs.length;
+          const totalSpent = clientAgs.reduce((s, a) => s + Number(a.valor_total), 0);
+          return {
+            id: c.id,
+            name: c.nome,
+            phone: c.telefone,
+            email: c.email,
+            dob: c.data_nascimento ? new Date(c.data_nascimento + 'T00:00:00') : null,
+            observacoes: c.observacoes,
+            visits,
+            totalSpent
+          };
+        });
+
+        state.db.servicos = (servicesData || []).map(s => ({
+          id: s.id,
+          categoria: s.categorias_servicos ? s.categorias_servicos.nome : 'Sem categoria',
+          nome: s.nome,
+          preco: Number(s.valor),
+          detalhes: s.descricao,
+          duracao: s.duracao_minutos,
+          cor: s.cor,
+          ativo: s.ativo,
+          foto: `https://placehold.co/300x200/FFE4E1/FF6FB5?text=${encodeURIComponent(s.nome)}`
+        }));
+
+        state.db.agendamentos = (agData || []).map(a => {
+          const sNames = (a.agendamento_servicos || []).map(as => as.servicos ? as.servicos.nome : 'Serviço');
+          return {
+            id: a.id,
+            clientId: a.cliente_id,
+            cliente: a.clientes ? a.clientes.nome : 'Desconhecido',
+            servicos: sNames,
+            categoria: sNames.length > 0 ? corPorServico(sNames[0]) : 'blue',
+            data: a.data,
+            inicio: a.hora_inicio ? a.hora_inicio.slice(0, 5) : '00:00',
+            fim: a.hora_fim ? a.hora_fim.slice(0, 5) : '00:00',
+            valor: Number(a.valor_total),
+            statusAgendamento: a.status,
+            statusFinanceiro: a.status_financeiro,
+            observacoes: a.observacoes,
+            motivoCancelamento: a.motivo_cancelamento,
+            canceladoEm: a.cancelado_em ? a.cancelado_em.slice(0, 10) : null,
+            reagendadoPara: a.reagendado_para
+          };
+        });
+
+        state.db.cobrancas = state.db.agendamentos.map(a => {
+          const statusMap = { 'Sem Sinal': 'Aguardando sinal', 'Sinal Pago': 'Sinal pago', 'Total Pago': 'Confirmado', 'Reembolsar': 'Reembolsar' };
+          return {
+            id: "AG" + a.id,
+            client: a.cliente,
+            date: new Date(a.data + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+            services: a.servicos.join(' + '),
+            total: a.valor,
+            status: statusMap[a.statusFinanceiro] || 'Aguardando sinal',
+            isPaid: a.statusFinanceiro === 'Total Pago' || a.statusFinanceiro === 'Sinal Pago'
+          };
+        });
+
+        const servVendidosMap = {};
+        (agData || []).filter(a => a.status === 'Atendido').forEach(a => {
+          (a.agendamento_servicos || []).forEach(as => {
+            const sName = as.servicos ? as.servicos.nome : 'Outros';
+            if (!servVendidosMap[sName]) {
+              servVendidosMap[sName] = { nome: sName, qtd: 0, receita: 0 };
+            }
+            servVendidosMap[sName].qtd += 1;
+            servVendidosMap[sName].receita += Number(as.valor);
+          });
+        });
+        state.db.servicosVendidos = Object.values(servVendidosMap).sort((a, b) => b.receita - a.receita);
+
+      } catch (err) {
+        console.error('Error syncing from Supabase:', err);
+        showToast('Erro ao sincronizar dados com o Supabase: ' + err.message, 'error');
+      }
+    }
+
+    let realtimeSubscription = null;
+    function setupRealtimeSubscription() {
+      if (!supabaseClient || realtimeSubscription) return;
+      realtimeSubscription = supabaseClient
+        .channel('schema-db-changes')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'agendamentos' },
+          async (payload) => {
+            console.log('Realtime change in agendamentos:', payload);
+            await syncFromSupabase();
+            renderAllData();
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'clientes' },
+          async (payload) => {
+            console.log('Realtime change in clientes:', payload);
+            await syncFromSupabase();
+            renderAllData();
+          }
+        )
+        .subscribe();
+    }
+
+    async function login(userObj) {
       state.currentUser = userObj;
       localStorage.setItem('zaya_user', JSON.stringify(state.currentUser));
 
-      document.getElementById('login-screen').classList.add('hidden');
+      document.querySelectorAll('.auth-screen').forEach(el => el.classList.add('hidden'));
       document.getElementById('app-container').classList.remove('hidden');
       document.body.classList.toggle('scope-saas', userObj.scope === 'saas');
 
@@ -1793,16 +2383,21 @@
       document.getElementById('nav-saas').classList.toggle('hidden', userObj.scope !== 'saas');
 
       applyPermissions();
+      await syncFromSupabase();
+      setupRealtimeSubscription();
       renderAllData();
       navigate(userObj.scope === 'saas' ? 'saas-dashboard' : 'dashboard');
       showToast(`Bem-vinda(o), ${userObj.name}!`);
     }
 
-    function logout() {
+    async function logout() {
+      if (supabaseClient && state.currentUser && state.currentUser.isSupabaseUser) {
+        await supabaseClient.auth.signOut();
+      }
       localStorage.removeItem('zaya_user');
       state.currentUser = null;
       document.getElementById('app-container').classList.add('hidden');
-      document.getElementById('login-screen').classList.remove('hidden');
+      showAuthScreen('login-screen');
       document.getElementById('login-form').reset();
       document.body.classList.remove('scope-saas');
     }
@@ -2023,8 +2618,8 @@
 
     <div class="grid grid-cols-3 gap-3">
       <div><label class="text-xs text-gray-500 block mb-1">Data *</label><input type="date" id="ag-data" value="${original.data}" class="w-full p-2 border rounded-lg"></div>
-      <div><label class="text-xs text-gray-500 block mb-1">Início *</label><input type="time" id="ag-inicio" value="${original.inicio}" class="w-full p-2 border rounded-lg"></div>
-      <div><label class="text-xs text-gray-500 block mb-1">Fim *</label><input type="time" id="ag-fim" value="${original.fim}" class="w-full p-2 border rounded-lg"></div>
+      <div><label class="text-xs text-gray-500 block mb-1">Início *</label><input type="time" id="ag-inicio" value="${original.inicio}" class="w-full p-2 border rounded-lg" onchange="atualizarCalculosAgendamento('ag-servicos-checklist', 'ag-inicio', 'ag-fim', 'ag-valor')"></div>
+      <div><label class="text-xs text-gray-500 block mb-1">Fim *</label><input type="time" id="ag-fim" value="${original.fim}" class="w-full p-2 border rounded-lg" readonly></div>
     </div>
 
     <div>
@@ -2042,6 +2637,7 @@
     </div>`;
 
       renderServicosChecklist('ag-servicos-checklist', 'ag-valor', original.servicos);
+      atualizarCalculosAgendamento('ag-servicos-checklist', 'ag-inicio', 'ag-fim', 'ag-valor');
       renderStatusBotoesModal();
 
       document.getElementById('modal-agendamento-actions').innerHTML = `
@@ -2050,7 +2646,7 @@
       openModal('modal-agendamento-detalhe');
     }
 
-    function handleSalvarAgendamento() {
+    async function handleSalvarAgendamento() {
       if (!agendamentoDraft || !agendamentoDraftOriginal) return;
       const original = agendamentoDraftOriginal;
 
@@ -2064,50 +2660,71 @@
       }
 
       const novoStatusAgendamento = agendamentoDraft.statusAgendamento;
-      original.servicos = servicosSelecionados;
-      original.categoria = corPorServico(servicosSelecionados[0]);
-      original.data = document.getElementById('ag-data').value;
-      original.inicio = document.getElementById('ag-inicio').value;
-      original.fim = document.getElementById('ag-fim').value;
-      original.valor = novoValor;
-      original.statusAgendamento = novoStatusAgendamento;
-      original.statusFinanceiro = agendamentoDraft.statusFinanceiro;
-      original.canceladoEm = novoStatusAgendamento === 'Cancelado' ? (original.canceladoEm || formatDateKey(new Date())) : null;
+      let motivoCancelamento = null;
+      if (novoStatusAgendamento === 'Cancelado' && original.statusAgendamento !== 'Cancelado') {
+        motivoCancelamento = window.prompt('Informe o motivo do cancelamento:');
+        if (motivoCancelamento === null) return;
+      }
 
-      renderAgenda();
-      renderDashboard();
-      closeModal('modal-agendamento-detalhe');
-      showToast('Agendamento salvo com sucesso', 'success');
-      console.log('[Zaya] Persistir agendamento no backend:', original);
-      // TODO backend: PATCH /agendamentos/:id { servicos[], data, inicio, fim, valor, statusAgendamento, statusFinanceiro, canceladoEm }
-      // n8n webhook: POST /webhook/agendamentos/atualizar { ...original, empresa_id }
-      // Nota: nenhum registro é excluído aqui — cancelamento é só uma troca de status, mantendo o histórico do cliente para automações de marketing
-      agendamentoDraft = null;
-      agendamentoDraftOriginal = null;
+      const servicosJson = servicosSelecionados.map(nome => {
+        const s = state.db.servicos.find(x => x.nome === nome);
+        return {
+          servico_id: s.id,
+          valor: s.preco,
+          duracao: s.duracao
+        };
+      });
+
+      const modalElement = document.getElementById('modal-agendamento-detalhe');
+      const saveBtn = modalElement.querySelector('button[onclick="handleSalvarAgendamento()"]');
+      if (saveBtn) saveBtn.disabled = true;
+
+      try {
+        const { error } = await supabaseClient.rpc('atualizar_agendamento', {
+          p_agendamento_id: original.id,
+          p_data: document.getElementById('ag-data').value,
+          p_hora_inicio: document.getElementById('ag-inicio').value + ':00',
+          p_hora_fim: document.getElementById('ag-fim').value + ':00',
+          p_valor_total: novoValor,
+          p_status: novoStatusAgendamento,
+          p_status_financeiro: agendamentoDraft.statusFinanceiro,
+          p_observacoes: original.observacoes || '',
+          p_motivo_cancelamento: motivoCancelamento,
+          p_servicos: servicosJson
+        });
+
+        if (error) throw error;
+
+        showToast('Agendamento salvo com sucesso', 'success');
+        closeModal('modal-agendamento-detalhe');
+        await syncFromSupabase();
+        renderAgenda();
+        renderDashboard();
+
+        agendamentoDraft = null;
+        agendamentoDraftOriginal = null;
+      } catch (err) {
+        showToast('Erro ao salvar agendamento: ' + err.message, 'error');
+      } finally {
+        if (saveBtn) saveBtn.disabled = false;
+      }
     }
 
     function openNovoAgendamentoModal() {
       document.getElementById('na-cliente').innerHTML = state.db.clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
       document.getElementById('na-data').value = formatDateKey(state.agenda.baseDate);
       document.getElementById('na-valor').value = '';
+      document.getElementById('na-fim').value = '';
+      document.getElementById('na-fim').readOnly = true;
       renderServicosChecklist('na-servicos-checklist', 'na-valor', []);
       openModal('modal-novo-agendamento');
     }
-    function handleNovoAgendamentoSubmit(e) {
+
+    async function handleNovoAgendamentoSubmit(e) {
       e.preventDefault();
       const servicosSelecionados = getServicosSelecionados('na-servicos-checklist');
       if (servicosSelecionados.length === 0) { showToast('Selecione ao menos um serviço', 'error'); return; }
       const clientId = parseInt(document.getElementById('na-cliente').value);
-      const client = state.db.clients.find(c => c.id === clientId);
-      state.db.agendamentos.push({
-        id: 'AG' + Math.floor(100 + Math.random() * 900), clientId, cliente: client ? client.name : 'Cliente',
-        servicos: servicosSelecionados, categoria: corPorServico(servicosSelecionados[0]), data: document.getElementById('na-data').value,
-        inicio: document.getElementById('na-inicio').value, fim: document.getElementById('na-fim').value,
-        valor: parseFloat(document.getElementById('na-valor').value) || 0,
-        statusAgendamento: 'Pendente', statusFinanceiro: 'Sem Sinal', canceladoEm: null
-      });
-      renderAgenda(); renderDashboard(); closeModal('modal-novo-agendamento'); e.target.reset();
-      showToast('Agendamento criado com sucesso', 'success');
       // n8n webhook: POST /webhook/agendamentos (ver comentário no formulário do modal)
     }
 
@@ -2944,10 +3561,21 @@
     // =====================================================================
     // INIT
     // =====================================================================
-    window.onload = () => {
-      const savedUser = localStorage.getItem('zaya_user');
-      if (savedUser) login(JSON.parse(savedUser));
-    };
+    // Quando o Supabase está configurado, a restauração de sessão é feita pelo evento
+    // INITIAL_SESSION do onAuthStateChange (registrado acima). Sem Supabase configurado,
+    // caímos apenas no login mockado salvo em localStorage.
+    if (!supabaseClient) {
+      window.onload = () => {
+        const savedUser = localStorage.getItem('zaya_user');
+        if (savedUser) {
+          const parsed = JSON.parse(savedUser);
+          if (!parsed.isSupabaseUser) login(parsed);
+          else showAuthScreen('login-screen');
+        } else {
+          showAuthScreen('login-screen');
+        }
+      };
+    }
   </script>
 </body>
 
